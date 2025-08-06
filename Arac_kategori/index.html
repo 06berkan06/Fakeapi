@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚗 Araç Yönetim Sistemi</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Arayüzü -->
+    <div id="login-container" class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1><i class="fas fa-truck"></i> Araç Yönetim Sistemi</h1>
+                <p>Giriş yapın</p>
+            </div>
+            <form id="login-form" class="login-form">
+                <div class="input-group">
+                    <label for="kullanici-adi">Kullanıcı Adı</label>
+                    <input type="text" id="kullanici-adi" placeholder="Kullanıcı adınız" required>
+                </div>
+                <div class="input-group">
+                    <label for="parola">Parola</label>
+                    <input type="password" id="parola" placeholder="Parolanız" required>
+                </div>
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                </button>
+            </form>
+            <div class="login-info">
+                <p><strong>Test Kullanıcıları:</strong></p>
+                <p><strong>Admin:</strong> Kullanıcı adı: <code>admin</code> | Parola: <code>admin123</code></p>
+                <p><strong>Normal Kullanıcı:</strong> Kullanıcı adı: <code>user</code> | Parola: <code>user123</code></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ana Uygulama Arayüzü -->
+    <div id="main-container" class="container" style="display: none;">
+        <header class="header">
+            <h1><i class="fas fa-truck"></i> Yol Bakım Araçları Yönetimi</h1>
+            <p class="subtitle">Profesyonel araç yönetim sistemi</p>
+            <div class="user-info">
+                <span id="current-user"></span>
+                <button onclick="logout()" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Çıkış
+                </button>
+            </div>
+        </header>
+        
+        <!-- Başarı/Hata Mesajları -->
+        <div id="message" class="message" style="display: none;"></div>
+        
+        <!-- Araç Ekleme Formu (Sadece Admin) -->
+        <div id="admin-form" class="form-section" style="display: none;">
+            <h3><i class="fas fa-plus-circle"></i> Yeni Araç Ekle (Admin)</h3>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="isim">Araç İsmi</label>
+                    <input type="text" id="isim" placeholder="Örn: Kar Küreme Aracı" maxlength="100">
+                </div>
+                <div class="input-group">
+                    <label for="kategori">Kategori</label>
+                    <input type="text" id="kategori" placeholder="Örn: Yol Bakım" maxlength="50">
+                </div>
+                <div class="input-group">
+                    <label for="model">Model</label>
+                    <input type="text" id="model" placeholder="Örn: KKA-2022" maxlength="50">
+                </div>
+                <div class="input-group">
+                    <label for="yil">Yıl</label>
+                    <input type="number" id="yil" placeholder="1950-2024" min="1950" max="2024">
+                </div>
+                <button onclick="aracEkle()" class="btn-primary">
+                    <i class="fas fa-plus"></i> Araç Ekle
+                </button>
+            </div>
+        </div>
+        
+        <!-- Filtreler -->
+        <div class="filter-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="arama" placeholder="Araç ara..." oninput="araclariListele()">
+            </div>
+            <div class="filter-buttons">
+                <button onclick="filtrele('all')" class="filter-btn active" id="btn-all">
+                    <i class="fas fa-list"></i> Tümü
+                </button>
+                <button onclick="filtrele('favori')" class="filter-btn" id="btn-favori">
+                    <i class="fas fa-star"></i> Favoriler
+                </button>
+                <button onclick="filtrele('normal')" class="filter-btn" id="btn-normal">
+                    <i class="fas fa-circle"></i> Normal
+                </button>
+            </div>
+        </div>
+        
+        <!-- Araçlar Listesi -->
+        <div id="araclar-listesi" class="araclar-container"></div>
+        
+        <!-- İstatistikler -->
+        <div class="stats">
+            <div class="stat-item">
+                <i class="fas fa-truck"></i>
+                <span id="toplam-sayi">Toplam: 0</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-star"></i>
+                <span id="favori-sayi">Favori: 0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detay Modal -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fas fa-truck"></i> Araç Detayları</h2>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <i class="fas fa-tag"></i>
+                        <div class="detail-info">
+                            <label>İsim</label>
+                            <span id="detail-isim"></span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-folder"></i>
+                        <div class="detail-info">
+                            <label>Kategori</label>
+                            <span id="detail-kategori"></span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-cog"></i>
+                        <div class="detail-info">
+                            <label>Model</label>
+                            <span id="detail-model"></span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-calendar"></i>
+                        <div class="detail-info">
+                            <label>Yıl</label>
+                            <span id="detail-yil"></span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-star"></i>
+                        <div class="detail-info">
+                            <label>Favori Durumu</label>
+                            <span id="detail-favori"></span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-id-card"></i>
+                        <div class="detail-info">
+                            <label>ID</label>
+                            <span id="detail-id"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal()">
+                    <i class="fas fa-times"></i> Kapat
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/app.js"></script>
+</body>
+</html>
