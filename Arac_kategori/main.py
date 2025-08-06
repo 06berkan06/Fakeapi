@@ -44,6 +44,12 @@ async def arac_ui():
     return FileResponse("Fakeapi/Arac_kategori/index.html")
 
 
+@app.get("/login")
+async def login_page():
+    """Login sayfası"""
+    return FileResponse("Fakeapi/Arac_kategori/login.html")
+
+
 @app.on_event("startup")
 def startup_event():
     from .database import SessionLocal

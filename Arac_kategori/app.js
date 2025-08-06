@@ -3,9 +3,10 @@ let currentFilter = 'all';
 let allAraclar = [];
 let currentUser = null;
 
-// Sayfa yüklendiğinde login kontrolü
+// Sayfa yüklendiğinde çalıştır
 document.addEventListener('DOMContentLoaded', function() {
     checkLoginStatus();
+    araclariListele();
 });
 
 // Login durumu kontrolü
@@ -13,78 +14,33 @@ function checkLoginStatus() {
     const user = localStorage.getItem('currentUser');
     if (user) {
         currentUser = JSON.parse(user);
-        showMainApp();
+        updateUserInterface();
     } else {
-        showLoginForm();
+        // Varsayılan olarak user olarak çalış
+        currentUser = { kullanici_adi: 'Kullanıcı', admin: false };
+        updateUserInterface();
     }
 }
 
-// Login formunu göster
-function showLoginForm() {
-    document.getElementById('login-container').style.display = 'flex';
-    document.getElementById('main-container').style.display = 'none';
-}
-
-// Ana uygulamayı göster
-function showMainApp() {
-    document.getElementById('login-container').style.display = 'none';
-    document.getElementById('main-container').style.display = 'block';
-    
-    // Kullanıcı bilgilerini göster
+// Kullanıcı arayüzünü güncelle
+function updateUserInterface() {
     const userText = currentUser.admin ? 
         `Hoş geldin, ${currentUser.kullanici_adi}! (Admin)` : 
-        `Hoş geldin, ${currentUser.kullanici_adi}!`;
+        `Kullanıcı`;
     document.getElementById('current-user').textContent = userText;
     
-    // Admin formunu göster/gizle
-    const adminForm = document.getElementById('admin-form');
+    // Admin kontrolü ile butonları göster/gizle
     if (currentUser.admin) {
-        adminForm.style.display = 'block';
+        document.querySelector('.btn-logout').style.display = 'inline-block';
+        document.getElementById('admin-form').style.display = 'block';
     } else {
-        adminForm.style.display = 'none';
+        document.querySelector('.btn-logout').style.display = 'none';
+        document.getElementById('admin-form').style.display = 'none';
     }
-    
-    araclariListele();
 }
 
-// Login işlemi
-async function login(event) {
-    event.preventDefault();
-    
-    const kullaniciAdi = document.getElementById('kullanici-adi').value;
-    const parola = document.getElementById('parola').value;
-    
-    if (!kullaniciAdi || !parola) {
-        showMessage('Kullanıcı adı ve parola gereklidir.', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                kullanici_adi: kullaniciAdi,
-                parola: parola
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
-            currentUser = data.kullanici;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            showMainApp();
-            showMessage('Giriş başarılı!', 'success');
-        } else {
-            showMessage(data.message || 'Giriş başarısız.', 'error');
-        }
-    } catch (error) {
-        showMessage('Bağlantı hatası: ' + error.message, 'error');
-    }
-}
+// Login işlemi - login.html sayfasında yapılacak
+// Bu fonksiyon artık kullanılmıyor
 
 // Logout işlemi
 async function logout() {
@@ -96,12 +52,11 @@ async function logout() {
     
     currentUser = null;
     localStorage.removeItem('currentUser');
-    showLoginForm();
+    updateUserInterface();
     showMessage('Çıkış yapıldı.', 'success');
 }
 
-// Login form event listener
-document.getElementById('login-form').addEventListener('submit', login);
+
 
 // Mesaj gösterme fonksiyonu
 function showMessage(message, type = 'success') {
@@ -293,12 +248,8 @@ function validateForm() {
     return true;
 }
 
-// Araç ekle (sadece admin)
+// Araç ekle
 async function aracEkle() {
-    if (!currentUser || !currentUser.admin) {
-        showMessage('Bu işlem için admin yetkisi gereklidir.', 'error');
-        return;
-    }
     
     if (!validateForm()) return;
     
@@ -339,12 +290,8 @@ async function aracEkle() {
     }
 }
 
-// Araç sil (sadece admin)
+// Araç sil
 async function aracSil(id) {
-    if (!currentUser || !currentUser.admin) {
-        showMessage('Bu işlem için admin yetkisi gereklidir.', 'error');
-        return;
-    }
     
     if (!confirm('Bu aracı silmek istediğinizden emin misiniz?')) {
         return;
@@ -368,12 +315,8 @@ async function aracSil(id) {
     }
 }
 
-// Favori durumunu değiştir (tüm kullanıcılar)
+// Favori durumunu değiştir
 async function favoriDegistir(id) {
-    if (!currentUser) {
-        showMessage('Bu işlem için giriş yapmanız gereklidir.', 'error');
-        return;
-    }
     
     try {
         const res = await fetch(`${API_URL}/${id}/favori`, {

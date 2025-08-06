@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş - Araç Yönetim Sistemi</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-header">
+                <h1>🚗 Araç Yönetim Sistemi</h1>
+                <p>Giriş yapın</p>
+            </div>
+            
+            <form class="login-form" id="login-form">
+                <div class="form-group">
+                    <label for="kullanici_adi">Kullanıcı Adı:</label>
+                    <input type="text" id="kullanici_adi" name="kullanici_adi" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="parola">Parola:</label>
+                    <input type="password" id="parola" name="parola" required>
+                </div>
+                
+                <button type="submit" class="btn-login">Giriş Yap</button>
+            </form>
+            
+            <div class="login-info">
+                <h3>Admin Girişi:</h3>
+                <p><strong>Kullanıcı Adı:</strong> admin</p>
+                <p><strong>Parola:</strong> admin123</p>
+                <p><em>Bu sayfa sadece admin girişi için kullanılır.</em></p>
+            </div>
+            
+
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Sayfa yüklendiğinde localStorage'dan kullanıcı bilgisini al
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                // Eğer zaten giriş yapılmışsa ana sayfaya yönlendir
+                window.location.href = '/';
+            }
+        });
+
+        // Login form submit
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const loginData = {
+                kullanici_adi: formData.get('kullanici_adi'),
+                parola: formData.get('parola')
+            };
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Kullanıcı bilgilerini localStorage'a kaydet
+                    currentUser = result.kullanici;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    // Ana sayfaya yönlendir
+                    window.location.href = '/';
+                } else {
+                    alert('Giriş başarısız: ' + (result.detail || 'Bilinmeyen hata'));
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Giriş sırasında hata oluştu');
+            }
+        });
+    </script>
+</body>
+</html> 
