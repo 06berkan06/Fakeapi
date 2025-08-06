@@ -3,39 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş - Araç Yönetim Sistemi</title>
+    <title>Giriş - Modern Araç Yönetim Sistemi</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <meta name="description" content="Admin girişi - Araç yönetim sistemi">
+    <meta name="keywords" content="admin girişi, araç yönetimi, yönetici paneli">
 </head>
 <body>
     <div class="login-container">
         <div class="login-box">
             <div class="login-header">
-                <h1>🚗 Araç Yönetim Sistemi</h1>
-                <p>Giriş yapın</p>
+                <h1><i class="fas fa-truck"></i> Araç Yönetim Sistemi</h1>
+                <p>Admin Girişi</p>
             </div>
             
-            <form class="login-form" id="login-form">
+            <form class="login-form" id="login-form" aria-labelledby="login-title">
+                <h2 id="login-title" class="visually-hidden">Giriş Formu</h2>
                 <div class="form-group">
                     <label for="kullanici_adi">Kullanıcı Adı:</label>
-                    <input type="text" id="kullanici_adi" name="kullanici_adi" required>
+                    <input type="text" id="kullanici_adi" name="kullanici_adi" required autocomplete="username">
                 </div>
                 
                 <div class="form-group">
                     <label for="parola">Parola:</label>
-                    <input type="password" id="parola" name="parola" required>
+                    <input type="password" id="parola" name="parola" required autocomplete="current-password">
                 </div>
                 
-                <button type="submit" class="btn-login">Giriş Yap</button>
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                </button>
             </form>
             
             <div class="login-info">
-                <h3>Admin Girişi:</h3>
+                <h3><i class="fas fa-info-circle"></i> Admin Girişi:</h3>
                 <p><strong>Kullanıcı Adı:</strong> admin</p>
                 <p><strong>Parola:</strong> admin123</p>
                 <p><em>Bu sayfa sadece admin girişi için kullanılır.</em></p>
             </div>
-            
-
         </div>
     </div>
 

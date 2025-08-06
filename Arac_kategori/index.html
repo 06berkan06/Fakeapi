@@ -3,151 +3,1272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚗 Araç Yönetim Sistemi</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <title>Fleet Operations Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Fleetio-inspired Colors */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-sidebar: #1e293b;
+            --bg-sidebar-hover: #334155;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-sidebar: #cbd5e1;
+            --text-sidebar-hover: #f1f5f9;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --card-bg: #ffffff;
+            --input-bg: #ffffff;
+            --modal-bg: #ffffff;
+            --success-bg: #dcfce7;
+            --warning-bg: #fef3c7;
+            --danger-bg: #fee2e2;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-sidebar: #020617;
+            --bg-sidebar-hover: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-sidebar: #64748b;
+            --text-sidebar-hover: #f8fafc;
+            --border-color: #334155;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #34d399;
+            --accent-warning: #fbbf24;
+            --accent-danger: #f87171;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --card-bg: #1e293b;
+            --input-bg: #334155;
+            --modal-bg: #1e293b;
+            --success-bg: #065f46;
+            --warning-bg: #92400e;
+            --danger-bg: #991b1b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar */
+        aside {
+            width: 280px;
+            background: linear-gradient(180deg, var(--bg-sidebar) 0%, #0f172a 100%);
+            color: white;
+            height: 100vh;
+            padding: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-sidebar-hover);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-header h2 i {
+            color: var(--accent-primary);
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            padding: 0 20px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sidebar);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            margin: 2px 0;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            color: var(--text-sidebar);
+            position: relative;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-sidebar-hover);
+            color: var(--text-sidebar-hover);
+        }
+
+        .nav-item.active {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: var(--accent-secondary);
+        }
+
+        .nav-item i {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .top-bar h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .top-bar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-primary);
+        }
+
+        .btn-danger {
+            background-color: var(--accent-danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-success {
+            background-color: var(--accent-secondary);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-card .change {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .stat-card .change.positive {
+            color: var(--accent-secondary);
+        }
+
+        .stat-card .change.negative {
+            color: var(--accent-danger);
+        }
+
+        /* Vehicle Cards */
+        .vehicles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .vehicle-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .vehicle-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .vehicle-card.favorite {
+            border-color: var(--accent-warning);
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(245, 158, 11, 0.05) 100%);
+        }
+
+        .vehicle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .vehicle-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .vehicle-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .vehicle-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon:hover {
+            background-color: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-icon.favorite {
+            color: var(--accent-warning);
+        }
+
+        .vehicle-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .vehicle-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background-color: var(--success-bg);
+            color: var(--accent-secondary);
+        }
+
+        .status-maintenance {
+            background-color: var(--warning-bg);
+            color: var(--accent-warning);
+        }
+
+        .status-offline {
+            background-color: var(--danger-bg);
+            color: var(--accent-danger);
+        }
+
+        /* Search and Filters */
+        .filters-bar {
+            background-color: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            min-width: 150px;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--modal-bg);
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1001;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background-color: var(--accent-secondary);
+        }
+
+        .notification.error {
+            background-color: var(--accent-danger);
+        }
+
+        .notification.warning {
+            background-color: var(--accent-warning);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            aside {
+                width: 100%;
+                position: fixed;
+                z-index: 100;
+                transform: translateX(-100%);
+            }
+
+            aside.show {
+                transform: translateX(0);
+            }
+
+            .content {
+                padding: 16px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .vehicles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                min-width: auto;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Ana Uygulama Arayüzü -->
-    <div id="main-container" class="container">
-        <header class="header">
-            <h1><i class="fas fa-truck"></i> Yol Bakım Araçları Yönetimi</h1>
-            <p class="subtitle">Profesyonel araç yönetim sistemi</p>
-            <div class="user-info">
-                <span id="current-user">Kullanıcı</span>
-                <button onclick="logout()" class="btn-logout" style="display: none;">
-                    <i class="fas fa-sign-out-alt"></i> Çıkış
-                </button>
-            </div>
-        </header>
-        
-        <!-- Başarı/Hata Mesajları -->
-        <div id="message" class="message" style="display: none;"></div>
-        
-        <!-- Araç Ekleme Formu (Sadece Admin) -->
-        <div id="admin-form" class="form-section" style="display: none;">
-            <h3><i class="fas fa-plus-circle"></i> Yeni Araç Ekle (Admin)</h3>
-            <div class="form-grid">
-                <div class="input-group">
-                    <label for="isim">Araç İsmi</label>
-                    <input type="text" id="isim" placeholder="Örn: Kar Küreme Aracı" maxlength="100">
-                </div>
-                <div class="input-group">
-                    <label for="kategori">Kategori</label>
-                    <input type="text" id="kategori" placeholder="Örn: Yol Bakım" maxlength="50">
-                </div>
-                <div class="input-group">
-                    <label for="model">Model</label>
-                    <input type="text" id="model" placeholder="Örn: KKA-2022" maxlength="50">
-                </div>
-                <div class="input-group">
-                    <label for="yil">Yıl</label>
-                    <input type="number" id="yil" placeholder="1950-2024" min="1950" max="2024">
-                </div>
-                <button onclick="aracEkle()" class="btn-primary">
-                    <i class="fas fa-plus"></i> Araç Ekle
-                </button>
-            </div>
-        </div>
-        
-        <!-- Filtreler -->
-        <div class="filter-section">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" id="arama" placeholder="Araç ara..." oninput="araclariListele()">
-            </div>
-            <div class="filter-buttons">
-                <button onclick="filtrele('all')" class="filter-btn active" id="btn-all">
-                    <i class="fas fa-list"></i> Tümü
-                </button>
-                <button onclick="filtrele('favori')" class="filter-btn" id="btn-favori">
-                    <i class="fas fa-star"></i> Favoriler
-                </button>
-                <button onclick="filtrele('normal')" class="filter-btn" id="btn-normal">
-                    <i class="fas fa-circle"></i> Normal
-                </button>
-            </div>
-        </div>
-        
-        <!-- Araçlar Listesi -->
-        <div id="araclar-listesi" class="araclar-container"></div>
-        
-        <!-- İstatistikler -->
-        <div class="stats">
-            <div class="stat-item">
+    <!-- Sidebar -->
+    <aside>
+        <div class="sidebar-header">
+            <h2>
                 <i class="fas fa-truck"></i>
-                <span id="toplam-sayi">Toplam: 0</span>
+                FleetOps
+            </h2>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Ana Menü</div>
+                <ul>
+                    <li class="nav-item active" onclick="showSection('dashboard')">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </li>
+                    <li class="nav-item" onclick="showSection('vehicles')">
+                        <i class="fas fa-truck"></i>
+                        Araçlar
+                    </li>
+                    <li class="nav-item" onclick="showSection('favorites')">
+                        <i class="fas fa-heart"></i>
+                        Favoriler
+                    </li>
+                    <li class="nav-item" onclick="showSection('analytics')">
+                        <i class="fas fa-chart-bar"></i>
+                        Analitik
+                    </li>
+                </ul>
             </div>
-            <div class="stat-item">
-                <i class="fas fa-star"></i>
-                <span id="favori-sayi">Favori: 0</span>
+            
+            <div class="nav-section">
+                <div class="nav-section-title">Yönetim</div>
+                <ul>
+                    <li class="nav-item" onclick="showSection('add-vehicle')" id="addVehicleNav" style="display: none;">
+                        <i class="fas fa-plus"></i>
+                        Araç Ekle
+                    </li>
+                    <li class="nav-item" onclick="showSection('settings')">
+                        <i class="fas fa-cog"></i>
+                        Ayarlar
+                    </li>
+                </ul>
             </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+        <div class="top-bar">
+            <h1 id="pageTitle">Dashboard</h1>
+            <div class="top-bar-actions">
+                <button class="btn btn-secondary" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                    Tema
+                </button>
+                <button class="btn btn-primary" onclick="openLoginModal()" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Giriş Yap
+                </button>
+                <button class="btn btn-secondary" onclick="logout()" id="logoutBtn" style="display: none;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Çıkış
+                </button>
+                <span id="adminBtn" style="display: none;"></span>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section active">
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>Toplam Araç</h3>
+                        <div class="value" id="totalVehicles">0</div>
+                        <div class="change positive">+12% geçen aya göre</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Aktif Araç</h3>
+                        <div class="value" id="activeVehicles">0</div>
+                        <div class="change positive">+8% geçen aya göre</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Bakımda</h3>
+                        <div class="value" id="maintenanceVehicles">0</div>
+                        <div class="change negative">+3% geçen aya göre</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Favori Araç</h3>
+                        <div class="value" id="favoriteVehicles">0</div>
+                        <div class="change positive">+15% geçen aya göre</div>
+                    </div>
+                </div>
+
+                <div class="filters-bar">
+                    <div class="filters-row">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchInput" placeholder="Araç ara...">
+                        </div>
+                        <select id="categoryFilter" class="filter-select">
+                            <option value="">Tüm Kategoriler</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Sedan">Sedan</option>
+                            <option value="Hatchback">Hatchback</option>
+                            <option value="Pickup">Pickup</option>
+                            <option value="Sports">Sports</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="openVehicleModal('Yeni Araç Ekle')" id="addVehicleBtn" style="display: none;">
+                            <i class="fas fa-plus"></i>
+                            Araç Ekle
+                        </button>
+                    </div>
+                </div>
+
+                <div class="vehicles-grid" id="vehiclesGrid">
+                    <!-- Vehicles will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Other sections will be added dynamically -->
+        </div>
+    </main>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Admin Girişi</h2>
+                <button class="close-btn" onclick="closeLoginModal()">&times;</button>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Kullanıcı Adı</label>
+                    <input type="text" id="username" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Şifre</label>
+                    <input type="password" id="password" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Giriş Yap
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
-    <!-- Detay Modal -->
-    <div id="detail-modal" class="modal">
+    <!-- Vehicle Modal -->
+    <div id="vehicleModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title"><i class="fas fa-truck"></i> Araç Detayları</h2>
-                <button class="modal-close" onclick="closeModal()">
-                    <i class="fas fa-times"></i>
-                </button>
+                <h2 class="modal-title" id="vehicleModalTitle">Yeni Araç Ekle</h2>
+                <button class="close-btn" onclick="closeVehicleModal()">&times;</button>
             </div>
-            <div class="modal-body">
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <i class="fas fa-tag"></i>
-                        <div class="detail-info">
-                            <label>İsim</label>
-                            <span id="detail-isim"></span>
+            <form id="vehicleForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Marka</label>
+                        <input type="text" id="brand" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Model</label>
+                        <input type="text" id="model" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Yıl</label>
+                        <input type="number" id="year" class="form-input" min="1950" max="2024" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kategori</label>
+                        <select id="category" class="form-input" required>
+                            <option value="">Seçiniz</option>
+                            <option value="SUV">SUV</option>
+                            <option value="Sedan">Sedan</option>
+                            <option value="Hatchback">Hatchback</option>
+                            <option value="Pickup">Pickup</option>
+                            <option value="Sports">Sports</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Açıklama</label>
+                    <textarea id="description" class="form-input" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-save"></i>
+                        Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+
+    <script>
+        const API_BASE_URL = "http://localhost:8000";
+        let vehicles = [];
+        let currentUser = null;
+        let editingVehicleId = null;
+        let currentSection = 'dashboard';
+        let isDarkMode = localStorage.getItem('darkMode') === 'true';
+
+        // Theme Management
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            localStorage.setItem('darkMode', isDarkMode);
+            applyTheme();
+        }
+
+        // Navigation
+        function showSection(section) {
+            currentSection = section;
+            
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update page title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'vehicles': 'Araçlar',
+                'favorites': 'Favoriler',
+                'analytics': 'Analitik',
+                'add-vehicle': 'Araç Ekle',
+                'settings': 'Ayarlar'
+            };
+            document.getElementById('pageTitle').textContent = titles[section] || 'Dashboard';
+            
+            // Show appropriate content
+            if (section === 'dashboard') {
+                renderDashboard();
+            } else if (section === 'vehicles') {
+                renderVehicles();
+            } else if (section === 'favorites') {
+                renderFavorites();
+            } else if (section === 'add-vehicle') {
+                openVehicleModal('Yeni Araç Ekle');
+            }
+        }
+
+        // Dashboard
+        function renderDashboard() {
+            const totalVehicles = vehicles.length;
+            const activeVehicles = vehicles.filter(v => !v.favori).length;
+            const maintenanceVehicles = vehicles.filter(v => v.favori).length;
+            const favoriteVehicles = vehicles.filter(v => v.favori).length;
+
+            document.getElementById('totalVehicles').textContent = totalVehicles;
+            document.getElementById('activeVehicles').textContent = activeVehicles;
+            document.getElementById('maintenanceVehicles').textContent = maintenanceVehicles;
+            document.getElementById('favoriteVehicles').textContent = favoriteVehicles;
+
+            renderVehicles();
+        }
+
+        // Vehicle Management
+        async function fetchVehicles() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/araclar`);
+                if (response.ok) {
+                    vehicles = await response.json();
+                    renderDashboard();
+                }
+            } catch (error) {
+                console.error('Error fetching vehicles:', error);
+                showNotification('Araçlar yüklenirken hata oluştu', 'error');
+            }
+        }
+
+        function renderVehicles() {
+            const grid = document.getElementById('vehiclesGrid');
+            const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const categoryFilter = document.getElementById('categoryFilter')?.value || '';
+
+            let filteredVehicles = vehicles.filter(vehicle => {
+                const matchesSearch = vehicle.isim.toLowerCase().includes(searchTerm) ||
+                                    vehicle.model.toLowerCase().includes(searchTerm);
+                const matchesCategory = !categoryFilter || vehicle.kategori === categoryFilter;
+                return matchesSearch && matchesCategory;
+            });
+
+            if (filteredVehicles.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-truck"></i>
+                        <h3>Araç Bulunamadı</h3>
+                        <p>Arama kriterlerinize uygun araç bulunamadı.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredVehicles.map(vehicle => `
+                <div class="vehicle-card ${vehicle.favori ? 'favorite' : ''}">
+                    <div class="vehicle-header">
+                        <div>
+                            <div class="vehicle-title">${vehicle.isim}</div>
+                            <div class="vehicle-subtitle">${vehicle.model} • ${vehicle.yil}</div>
+                        </div>
+                        <div class="vehicle-actions">
+                            <button class="btn-icon ${vehicle.favori ? 'favorite' : ''}" 
+                                    onclick="toggleFavorite(${vehicle.id})" 
+                                    title="${vehicle.favori ? 'Favorilerden çıkar' : 'Favorilere ekle'}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <button class="btn-icon" onclick="editVehicle(${vehicle.id})" title="Düzenle">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            ${currentUser?.admin ? `
+                                <button class="btn-icon" onclick="deleteVehicle(${vehicle.id})" title="Sil">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
-                    <div class="detail-item">
-                        <i class="fas fa-folder"></i>
-                        <div class="detail-info">
-                            <label>Kategori</label>
-                            <span id="detail-kategori"></span>
+                    <div class="vehicle-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Kategori</div>
+                            <div class="detail-value">${vehicle.kategori}</div>
                         </div>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-cog"></i>
-                        <div class="detail-info">
-                            <label>Model</label>
-                            <span id="detail-model"></span>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-calendar"></i>
-                        <div class="detail-info">
-                            <label>Yıl</label>
-                            <span id="detail-yil"></span>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-star"></i>
-                        <div class="detail-info">
-                            <label>Favori Durumu</label>
-                            <span id="detail-favori"></span>
-                        </div>
-                    </div>
-                    <div class="detail-item">
-                        <i class="fas fa-id-card"></i>
-                        <div class="detail-info">
-                            <label>ID</label>
-                            <span id="detail-id"></span>
+                        <div class="detail-item">
+                            <div class="detail-label">Durum</div>
+                            <div class="detail-value">
+                                <span class="vehicle-status ${vehicle.favori ? 'status-maintenance' : 'status-active'}">
+                                    ${vehicle.favori ? 'Bakımda' : 'Aktif'}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeModal()">
-                    <i class="fas fa-times"></i> Kapat
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <script src="/static/app.js"></script>
+            `).join('');
+        }
+
+        function renderFavorites() {
+            const favoriteVehicles = vehicles.filter(v => v.favori);
+            // Similar to renderVehicles but only show favorites
+            renderVehicles(); // For now, just use the same function
+        }
+
+        // Vehicle Actions
+        async function toggleFavorite(vehicleId) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/araclar/${vehicleId}/favori`, {
+                    method: 'PATCH'
+                });
+                if (response.ok) {
+                    await fetchVehicles();
+                    showNotification('Favori durumu güncellendi', 'success');
+                }
+            } catch (error) {
+                console.error('Error toggling favorite:', error);
+                showNotification('Favori durumu güncellenirken hata oluştu', 'error');
+            }
+        }
+
+        async function addVehicle(formData) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/araclar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                if (response.ok) {
+                    await fetchVehicles();
+                    closeVehicleModal();
+                    showNotification('Araç başarıyla eklendi', 'success');
+                }
+            } catch (error) {
+                console.error('Error adding vehicle:', error);
+                showNotification('Araç eklenirken hata oluştu', 'error');
+            }
+        }
+
+        async function updateVehicle(vehicleId, formData) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/araclar/${vehicleId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                if (response.ok) {
+                    await fetchVehicles();
+                    closeVehicleModal();
+                    showNotification('Araç başarıyla güncellendi', 'success');
+                }
+            } catch (error) {
+                console.error('Error updating vehicle:', error);
+                showNotification('Araç güncellenirken hata oluştu', 'error');
+            }
+        }
+
+        async function deleteVehicle(vehicleId) {
+            if (!confirm('Bu aracı silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE_URL}/araclar/${vehicleId}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    await fetchVehicles();
+                    showNotification('Araç başarıyla silindi', 'success');
+                }
+            } catch (error) {
+                console.error('Error deleting vehicle:', error);
+                showNotification('Araç silinirken hata oluştu', 'error');
+            }
+        }
+
+        function editVehicle(id) {
+            const vehicle = vehicles.find(v => v.id === id);
+            if (vehicle) {
+                editingVehicleId = id;
+                document.getElementById('brand').value = vehicle.isim.split(' ')[0];
+                document.getElementById('model').value = vehicle.model;
+                document.getElementById('year').value = vehicle.yil;
+                document.getElementById('category').value = vehicle.kategori;
+                document.getElementById('description').value = vehicle.aciklama || '';
+                openVehicleModal('Araç Düzenle');
+            }
+        }
+
+        // Modal Management
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.add('show');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('show');
+        }
+
+        function openVehicleModal(title) {
+            document.getElementById('vehicleModalTitle').textContent = title;
+            document.getElementById('vehicleModal').classList.add('show');
+            if (!editingVehicleId) {
+                document.getElementById('vehicleForm').reset();
+            }
+        }
+
+        function closeVehicleModal() {
+            document.getElementById('vehicleModal').classList.remove('show');
+            editingVehicleId = null;
+        }
+
+        // User Management
+        function updateUIForUser() {
+            const loginBtn = document.getElementById('loginBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const adminBtn = document.getElementById('adminBtn');
+            const addVehicleNav = document.getElementById('addVehicleNav');
+            const addVehicleBtn = document.getElementById('addVehicleBtn');
+
+            if (currentUser) {
+                loginBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-flex';
+                if (currentUser.admin) {
+                    adminBtn.style.display = 'inline-flex';
+                    adminBtn.textContent = 'Admin: ' + currentUser.kullanici_adi;
+                    addVehicleNav.style.display = 'block';
+                    addVehicleBtn.style.display = 'inline-flex';
+                }
+            } else {
+                loginBtn.style.display = 'inline-flex';
+                logoutBtn.style.display = 'none';
+                adminBtn.style.display = 'none';
+                addVehicleNav.style.display = 'none';
+                addVehicleBtn.style.display = 'none';
+            }
+        }
+
+        async function logout() {
+            currentUser = null;
+            localStorage.removeItem('user');
+            updateUIForUser();
+            showNotification('Başarıyla çıkış yapıldı', 'success');
+        }
+
+        // Notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply theme
+            applyTheme();
+            
+            // Check for saved user
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                updateUIForUser();
+            }
+            
+            fetchVehicles();
+
+            // Event listeners
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    console.log('Login form submitted');
+                    
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    
+                    console.log('Username:', username);
+                    console.log('Password:', password);
+
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/login`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                kullanici_adi: username,
+                                parola: password
+                            })
+                        });
+                        
+                        console.log('Response status:', response.status);
+                        
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+                        }
+                        const data = await response.json();
+                        console.log('Login response:', data);
+                        
+                        currentUser = data.kullanici;
+                        localStorage.setItem('user', JSON.stringify(currentUser));
+                        showNotification(data.message, 'success');
+                        closeLoginModal();
+                        updateUIForUser();
+                        fetchVehicles();
+                    } catch (error) {
+                        console.error('Login error:', error);
+                        showNotification(`Giriş başarısız: ${error.message}`, 'error');
+                    }
+                });
+            } else {
+                console.error('Login form not found!');
+            }
+
+            document.getElementById('vehicleForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = {
+                    isim: document.getElementById('brand').value + ' ' + document.getElementById('model').value,
+                    model: document.getElementById('model').value,
+                    yil: parseInt(document.getElementById('year').value),
+                    kategori: document.getElementById('category').value,
+                    aciklama: document.getElementById('description').value
+                };
+
+                if (editingVehicleId) {
+                    updateVehicle(editingVehicleId, formData);
+                } else {
+                    addVehicle(formData);
+                }
+            });
+
+            // Search and filter
+            document.getElementById('searchInput')?.addEventListener('input', renderVehicles);
+            document.getElementById('categoryFilter')?.addEventListener('change', renderVehicles);
+        });
+    </script>
+</body>
+</html>
 </body>
 </html>
