@@ -53,6 +53,8 @@ class AracBase(BaseModel):
     model: str = Field(..., min_length=1, max_length=50,
                       description="Araç modeli")
     yil: int = Field(..., ge=1950, le=2024, description="Araç yılı")
+    aciklama: Optional[str] = None
+    resim_url: Optional[str] = None
 
     @validator('isim')
     def isim_gecerli(cls, v):

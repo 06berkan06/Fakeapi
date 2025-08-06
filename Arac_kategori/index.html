@@ -304,11 +304,12 @@
         .vehicle-card {
             background-color: var(--card-bg);
             border-radius: 12px;
-            padding: 20px;
+            padding: 0;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-color);
             transition: all 0.2s ease;
             position: relative;
+            overflow: hidden;
         }
 
         .vehicle-card:hover {
@@ -318,7 +319,30 @@
 
         .vehicle-card.favorite {
             border-color: var(--accent-warning);
-            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(245, 158, 11, 0.05) 100%);
+        }
+
+        .vehicle-image {
+            width: 100%;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            opacity: 0.8;
+        }
+
+        .vehicle-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+        }
+
+        .vehicle-content {
+            padding: 20px;
         }
 
         .vehicle-header {
@@ -679,6 +703,28 @@
             font-size: 14px;
             margin-bottom: 24px;
         }
+
+        /* User Badge */
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background-color: var(--bg-primary);
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .user-badge.admin {
+            background-color: var(--accent-warning);
+            color: white;
+        }
+
+        .user-badge.user {
+            background-color: var(--accent-secondary);
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -712,8 +758,8 @@
                         Analitik
                     </li>
                 </ul>
-            </div>
-            
+        </div>
+        
             <div class="nav-section">
                 <div class="nav-section-title">Yönetim</div>
                 <ul>
@@ -747,10 +793,10 @@
                     <i class="fas fa-sign-out-alt"></i>
                     Çıkış
                 </button>
-                <span id="adminBtn" style="display: none;"></span>
+                <div id="userBadge" style="display: none;"></div>
             </div>
         </div>
-
+        
         <div class="content">
             <!-- Dashboard Section -->
             <div id="dashboard" class="section active">
@@ -811,7 +857,7 @@
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">Admin Girişi</h2>
+                <h2 class="modal-title">Kullanıcı Girişi</h2>
                 <button class="close-btn" onclick="closeLoginModal()">&times;</button>
             </div>
             <form id="loginForm">
@@ -830,9 +876,14 @@
                     </button>
                 </div>
             </form>
+            <div style="margin-top: 20px; padding: 15px; background-color: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border-color);">
+                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 10px;">Test Kullanıcıları:</p>
+                <p style="font-size: 12px; color: var(--text-secondary);">Admin: admin / admin123</p>
+                <p style="font-size: 12px; color: var(--text-secondary);">User: user / user123</p>
+            </div>
         </div>
     </div>
-
+    
     <!-- Vehicle Modal -->
     <div id="vehicleModal" class="modal">
         <div class="modal-content">
@@ -867,6 +918,10 @@
                             <option value="Sports">Sports</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Resim URL (Opsiyonel)</label>
+                    <input type="url" id="imageUrl" class="form-input" placeholder="https://example.com/image.jpg">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Açıklama</label>
@@ -932,8 +987,12 @@
                 renderVehicles();
             } else if (section === 'favorites') {
                 renderFavorites();
+            } else if (section === 'analytics') {
+                renderAnalytics();
             } else if (section === 'add-vehicle') {
                 openVehicleModal('Yeni Araç Ekle');
+            } else if (section === 'settings') {
+                renderSettings();
             }
         }
 
@@ -991,38 +1050,43 @@
 
             grid.innerHTML = filteredVehicles.map(vehicle => `
                 <div class="vehicle-card ${vehicle.favori ? 'favorite' : ''}">
-                    <div class="vehicle-header">
-                        <div>
-                            <div class="vehicle-title">${vehicle.isim}</div>
-                            <div class="vehicle-subtitle">${vehicle.model} • ${vehicle.yil}</div>
+                    <div class="vehicle-image" style="background-image: url('${vehicle.resim_url || 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop'}')"></div>
+                    <div class="vehicle-content">
+                        <div class="vehicle-header">
+                            <div>
+                                <div class="vehicle-title">${vehicle.isim}</div>
+                                <div class="vehicle-subtitle">${vehicle.model} • ${vehicle.yil}</div>
+                            </div>
+                            <div class="vehicle-actions">
+                                ${currentUser ? `
+                                    <button class="btn-icon ${vehicle.favori ? 'favorite' : ''}" 
+                                            onclick="toggleFavorite(${vehicle.id})" 
+                                            title="${vehicle.favori ? 'Favorilerden çıkar' : 'Favorilere ekle'}">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                    <button class="btn-icon" onclick="editVehicle(${vehicle.id})" title="Düzenle">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                ` : ''}
+                                ${currentUser?.admin ? `
+                                    <button class="btn-icon" onclick="deleteVehicle(${vehicle.id})" title="Sil">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
-                        <div class="vehicle-actions">
-                            <button class="btn-icon ${vehicle.favori ? 'favorite' : ''}" 
-                                    onclick="toggleFavorite(${vehicle.id})" 
-                                    title="${vehicle.favori ? 'Favorilerden çıkar' : 'Favorilere ekle'}">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                            <button class="btn-icon" onclick="editVehicle(${vehicle.id})" title="Düzenle">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            ${currentUser?.admin ? `
-                                <button class="btn-icon" onclick="deleteVehicle(${vehicle.id})" title="Sil">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                    <div class="vehicle-details">
-                        <div class="detail-item">
-                            <div class="detail-label">Kategori</div>
-                            <div class="detail-value">${vehicle.kategori}</div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-label">Durum</div>
-                            <div class="detail-value">
-                                <span class="vehicle-status ${vehicle.favori ? 'status-maintenance' : 'status-active'}">
-                                    ${vehicle.favori ? 'Bakımda' : 'Aktif'}
-                                </span>
+                        <div class="vehicle-details">
+                            <div class="detail-item">
+                                <div class="detail-label">Kategori</div>
+                                <div class="detail-value">${vehicle.kategori}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">Durum</div>
+                                <div class="detail-value">
+                                    <span class="vehicle-status ${vehicle.favori ? 'status-maintenance' : 'status-active'}">
+                                        ${vehicle.favori ? 'Bakımda' : 'Aktif'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1036,8 +1100,83 @@
             renderVehicles(); // For now, just use the same function
         }
 
+        function renderAnalytics() {
+            const content = document.querySelector('.content');
+            content.innerHTML = `
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <h3>Toplam Görüntüleme</h3>
+                        <div class="value">1,234</div>
+                        <div class="change positive">+15% geçen aya göre</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Favori Tıklamaları</h3>
+                        <div class="value">567</div>
+                        <div class="change positive">+8% geçen aya göre</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Detay Görüntülemeleri</h3>
+                        <div class="value">890</div>
+                        <div class="change positive">+12% geçen aya göre</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Admin İşlemleri</h3>
+                        <div class="value">45</div>
+                        <div class="change positive">+5% geçen aya göre</div>
+                    </div>
+                </div>
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    <i class="fas fa-chart-bar" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                    <h3>Analitik Veriler</h3>
+                    <p>Detaylı analitik veriler burada görüntülenecek.</p>
+                </div>
+            `;
+        }
+
+        function renderSettings() {
+            const content = document.querySelector('.content');
+            content.innerHTML = `
+                <div style="max-width: 600px; margin: 0 auto;">
+                    <h2 style="margin-bottom: 24px; color: var(--text-primary);">Ayarlar</h2>
+                    <div class="stat-card" style="margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 16px;">Kullanıcı Bilgileri</h3>
+                        ${currentUser ? `
+                            <div style="margin-bottom: 16px;">
+                                <strong>Kullanıcı Adı:</strong> ${currentUser.kullanici_adi}
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <strong>Rol:</strong> ${currentUser.admin ? 'Admin' : 'Kullanıcı'}
+                            </div>
+                            <button class="btn btn-secondary" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                Çıkış Yap
+                            </button>
+                        ` : `
+                            <p style="color: var(--text-secondary);">Giriş yapmamışsınız.</p>
+                            <button class="btn btn-primary" onclick="openLoginModal()">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Giriş Yap
+                            </button>
+                        `}
+                    </div>
+                    <div class="stat-card">
+                        <h3 style="margin-bottom: 16px;">Tema Ayarları</h3>
+                        <button class="btn btn-secondary" onclick="toggleTheme()">
+                            <i class="fas fa-moon"></i>
+                            Tema Değiştir
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
         // Vehicle Actions
         async function toggleFavorite(vehicleId) {
+            if (!currentUser) {
+                showNotification('Favori eklemek için giriş yapmalısınız', 'warning');
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE_URL}/araclar/${vehicleId}/favori`, {
                     method: 'PATCH'
@@ -1114,6 +1253,7 @@
                 document.getElementById('model').value = vehicle.model;
                 document.getElementById('year').value = vehicle.yil;
                 document.getElementById('category').value = vehicle.kategori;
+                document.getElementById('imageUrl').value = vehicle.resim_url || '';
                 document.getElementById('description').value = vehicle.aciklama || '';
                 openVehicleModal('Araç Düzenle');
             }
@@ -1145,23 +1285,32 @@
         function updateUIForUser() {
             const loginBtn = document.getElementById('loginBtn');
             const logoutBtn = document.getElementById('logoutBtn');
-            const adminBtn = document.getElementById('adminBtn');
+            const userBadge = document.getElementById('userBadge');
             const addVehicleNav = document.getElementById('addVehicleNav');
             const addVehicleBtn = document.getElementById('addVehicleBtn');
 
             if (currentUser) {
                 loginBtn.style.display = 'none';
                 logoutBtn.style.display = 'inline-flex';
+                userBadge.style.display = 'flex';
+                userBadge.innerHTML = `
+                    <span class="user-badge ${currentUser.admin ? 'admin' : 'user'}">
+                        <i class="fas fa-${currentUser.admin ? 'crown' : 'user'}"></i>
+                        ${currentUser.kullanici_adi}
+                    </span>
+                `;
+                
                 if (currentUser.admin) {
-                    adminBtn.style.display = 'inline-flex';
-                    adminBtn.textContent = 'Admin: ' + currentUser.kullanici_adi;
                     addVehicleNav.style.display = 'block';
                     addVehicleBtn.style.display = 'inline-flex';
+                } else {
+                    addVehicleNav.style.display = 'none';
+                    addVehicleBtn.style.display = 'none';
                 }
             } else {
                 loginBtn.style.display = 'inline-flex';
                 logoutBtn.style.display = 'none';
-                adminBtn.style.display = 'none';
+                userBadge.style.display = 'none';
                 addVehicleNav.style.display = 'none';
                 addVehicleBtn.style.display = 'none';
             }
@@ -1204,13 +1353,9 @@
             if (loginForm) {
                 loginForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
-                    console.log('Login form submitted');
                     
                     const username = document.getElementById('username').value;
                     const password = document.getElementById('password').value;
-                    
-                    console.log('Username:', username);
-                    console.log('Password:', password);
 
                     try {
                         const response = await fetch(`${API_BASE_URL}/login`, {
@@ -1222,14 +1367,11 @@
                             })
                         });
                         
-                        console.log('Response status:', response.status);
-                        
                         if (!response.ok) {
                             const errorData = await response.json();
                             throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
                         }
                         const data = await response.json();
-                        console.log('Login response:', data);
                         
                         currentUser = data.kullanici;
                         localStorage.setItem('user', JSON.stringify(currentUser));
@@ -1242,8 +1384,6 @@
                         showNotification(`Giriş başarısız: ${error.message}`, 'error');
                     }
                 });
-            } else {
-                console.error('Login form not found!');
             }
 
             document.getElementById('vehicleForm').addEventListener('submit', (e) => {
@@ -1253,6 +1393,7 @@
                     model: document.getElementById('model').value,
                     yil: parseInt(document.getElementById('year').value),
                     kategori: document.getElementById('category').value,
+                    resim_url: document.getElementById('imageUrl').value || null,
                     aciklama: document.getElementById('description').value
                 };
 
@@ -1268,7 +1409,5 @@
             document.getElementById('categoryFilter')?.addEventListener('change', renderVehicles);
         });
     </script>
-</body>
-</html>
 </body>
 </html>

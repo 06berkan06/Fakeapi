@@ -352,35 +352,42 @@ function araclariListele() {
 function createVehicleCard(arac) {
     const favoriClass = arac.favori ? 'favori' : '';
     const favoriIcon = arac.favori ? 'fas fa-star' : 'far fa-star';
+    const defaultImage = "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop";
+    const vehicleImage = arac.resim_url || defaultImage;
     
     return `
         <div class="arac-card" data-id="${arac.id}">
-                <div class="arac-info">
-                    <div class="arac-baslik">
-                        <i class="fas fa-truck"></i>
-                        ${arac.isim}
-                    </div>
-                    <div class="arac-detay">
-                        <span><i class="fas fa-folder"></i> ${arac.kategori}</span>
+            <div class="arac-image">
+                <img src="${vehicleImage}" alt="${arac.isim}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0; opacity: 0.8;">
+            </div>
+            <div class="arac-info">
+                <div class="arac-baslik">
+                    <i class="fas fa-truck"></i>
+                    ${arac.isim}
+                </div>
+                <div class="arac-detay">
+                    <span><i class="fas fa-folder"></i> ${arac.kategori}</span>
                     <span><i class="fas fa-cog"></i> ${arac.model}</span>
-                        <span><i class="fas fa-calendar"></i> ${arac.yil}</span>
+                    <span><i class="fas fa-calendar"></i> ${arac.yil}</span>
                 </div>
-                </div>
-                <div class="arac-actions">
+            </div>
+            <div class="arac-actions">
                 <button class="detay-btn" onclick="showDetail(${arac.id})" aria-label="Detayları göster">
                     <i class="fas fa-info"></i>
                 </button>
-                <button class="favori-btn ${favoriClass}" onclick="favoriDegistir(${arac.id})" aria-label="Favori durumunu değiştir">
-                    <i class="${favoriIcon}"></i>
+                ${currentUser ? `
+                    <button class="favori-btn ${favoriClass}" onclick="favoriDegistir(${arac.id})" aria-label="Favori durumunu değiştir">
+                        <i class="${favoriIcon}"></i>
                     </button>
+                ` : ''}
                 ${currentUser && currentUser.admin ? `
                     <button class="sil-btn" onclick="aracSil(${arac.id})" aria-label="Aracı sil">
                         <i class="fas fa-trash"></i>
                     </button>
                 ` : ''}
             </div>
-                </div>
-            `;
+        </div>
+    `;
 }
 
 // Form validasyonu
