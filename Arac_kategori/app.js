@@ -360,18 +360,18 @@ function createVehicleCard(arac) {
             <div class="arac-image">
                 <img src="${vehicleImage}" alt="${arac.isim}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0; opacity: 0.8;">
             </div>
-            <div class="arac-info">
-                <div class="arac-baslik">
-                    <i class="fas fa-truck"></i>
-                    ${arac.isim}
-                </div>
-                <div class="arac-detay">
-                    <span><i class="fas fa-folder"></i> ${arac.kategori}</span>
+                <div class="arac-info">
+                    <div class="arac-baslik">
+                        <i class="fas fa-truck"></i>
+                        ${arac.isim}
+                    </div>
+                    <div class="arac-detay">
+                        <span><i class="fas fa-folder"></i> ${arac.kategori}</span>
                     <span><i class="fas fa-cog"></i> ${arac.model}</span>
-                    <span><i class="fas fa-calendar"></i> ${arac.yil}</span>
+                        <span><i class="fas fa-calendar"></i> ${arac.yil}</span>
                 </div>
-            </div>
-            <div class="arac-actions">
+                </div>
+                <div class="arac-actions">
                 <button class="detay-btn" onclick="showDetail(${arac.id})" aria-label="Detayları göster">
                     <i class="fas fa-info"></i>
                 </button>
@@ -386,8 +386,8 @@ function createVehicleCard(arac) {
                     </button>
                 ` : ''}
             </div>
-        </div>
-    `;
+                </div>
+            `;
 }
 
 // Form validasyonu

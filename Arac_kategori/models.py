@@ -19,6 +19,7 @@ class Arac(Base):
     model = Column(String)
     yil = Column(Integer)
     kategori = Column(String)
+    fiyat = Column(Integer, default=0)
     aciklama = Column(Text, nullable=True)
     favori = Column(Boolean, default=False)
     resim_url = Column(String, nullable=True)
@@ -37,6 +38,7 @@ def seed_data():
                 "model": "X5",
                 "yil": 2023,
                 "kategori": "SUV",
+                "fiyat": 850000,
                 "favori": True,
                 "resim_url": "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop"
             },

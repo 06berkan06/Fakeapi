@@ -53,6 +53,7 @@ class AracBase(BaseModel):
     model: str = Field(..., min_length=1, max_length=50,
                       description="Araç modeli")
     yil: int = Field(..., ge=1950, le=2024, description="Araç yılı")
+    fiyat: int = Field(..., ge=0, description="Araç fiyatı")
     aciklama: Optional[str] = None
     resim_url: Optional[str] = None
 

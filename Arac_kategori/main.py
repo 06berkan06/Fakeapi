@@ -75,10 +75,10 @@ async def startup_event():
     # Araçlar - Daha fazla örnek araç ekleyelim
     if db.query(Arac).count() == 0:
         araclar = [
-            Arac(isim="BMW X5", model="X5", yil=2023, kategori="SUV", favori=True, resim_url="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop"),
-            Arac(isim="Mercedes C-Class", model="C-Class", yil=2022, kategori="Sedan", favori=False, resim_url="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=400&h=300&fit=crop"),
-            Arac(isim="Audi A3", model="A3", yil=2023, kategori="Hatchback", favori=True, resim_url="https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400&h=300&fit=crop"),
-            Arac(isim="Volkswagen Golf", model="Golf", yil=2021, kategori="Hatchback", favori=False, resim_url="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop"),
+            Arac(isim="BMW X5", model="X5", yil=2023, kategori="SUV", fiyat=850000, favori=True, resim_url="https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=300&fit=crop"),
+            Arac(isim="Mercedes C-Class", model="C-Class", yil=2022, kategori="Sedan", fiyat=650000, favori=False, resim_url="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=400&h=300&fit=crop"),
+            Arac(isim="Audi A3", model="A3", yil=2023, kategori="Hatchback", fiyat=450000, favori=True, resim_url="https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400&h=300&fit=crop"),
+            Arac(isim="Volkswagen Golf", model="Golf", yil=2021, kategori="Hatchback", fiyat=350000, favori=False, resim_url="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=300&fit=crop"),
             Arac(isim="Toyota RAV4", model="RAV4", yil=2023, kategori="SUV", favori=True, resim_url="https://images.unsplash.com/photo-1541899481282-d53bffe3c55d?w=400&h=300&fit=crop"),
             Arac(isim="Honda Civic", model="Civic", yil=2022, kategori="Sedan", favori=False, resim_url="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=300&fit=crop"),
             Arac(isim="Ford F-150", model="F-150", yil=2023, kategori="Pickup", favori=True, resim_url="https://images.unsplash.com/photo-1563720223185-11003d516935?w=400&h=300&fit=crop"),
@@ -275,7 +275,7 @@ async def arac_ekle(arac: AracCreate, db: Session = Depends(get_db)):
         resim_url=arac.resim_url or default_image
     )
     db.add(db_arac)
-        db.commit()
+    db.commit()
     db.refresh(db_arac)
     
     # Analytics tracking
@@ -290,8 +290,8 @@ async def arac_sil(arac_id: int, db: Session = Depends(get_db)):
     if not arac:
         raise HTTPException(status_code=404, detail="Araç bulunamadı")
     
-        db.delete(arac)
-        db.commit()
+    db.delete(arac)
+    db.commit()
     
     # Analytics tracking
     await track_admin_action("delete_vehicle", arac_id)
@@ -305,9 +305,9 @@ async def favori_degistir(arac_id: int, db: Session = Depends(get_db)):
     if not arac:
         raise HTTPException(status_code=404, detail="Araç bulunamadı")
     
-        arac.favori = not arac.favori
-        db.commit()
-        db.refresh(arac)
+    arac.favori = not arac.favori
+    db.commit()
+    db.refresh(arac)
     
     # Analytics tracking
     await track_favorite_click(arac_id)
@@ -324,13 +324,13 @@ async def arac_guncelle(arac_id: int, arac_update: AracUpdate, db: Session = Dep
     for field, value in arac_update.dict(exclude_unset=True).items():
         setattr(arac, field, value)
     
-        db.commit()
-        db.refresh(arac)
+    db.commit()
+    db.refresh(arac)
     
     # Analytics tracking
     await track_admin_action("update_vehicle", arac_id)
     
-        return arac
+    return arac
 
 # Kullanıcı endpoints
 @app.post("/login", response_model=LoginResponse)
